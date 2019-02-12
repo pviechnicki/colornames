@@ -53,7 +53,25 @@ def closestColor(newColor, referenceColors):
         if distance < minDistance:
             minDistance = distance
             result = referenceColor
+
     return result
+
+def closestThreeColors(newColor, referenceColors):
+    '''
+    pick the three colors out of the reference color list which are the closest match to the new color
+    '''
+    result_list = [(rgbDistance(newColor, referenceColor),referenceColor) for referenceColor in referenceColors[0:]]
+    result_list = sorted(result_list)
+    result = [t for t in result_list[0:3]]
+
+    return result
+
+def my_classifier2(x):
+    distances = [[squared_dist(x[j,],train_data[i,]) for i in range(len(train_labels))] for j in range(len(test_labels))]
+
+    indices = np.argmin(distances, axis=1)
+    return train_labels[indices]
+
 
 def learnColors(colorNamesDf, n=43):
     '''

@@ -3,6 +3,7 @@ import random
 import pickle
 from color_utils import Color
 from color_utils import closestColor
+from color_utils import closestThreeColors
 from nltk import TreebankWordTokenizer
 from color_utils import ColorTagger
 import tkinter as tk
@@ -23,7 +24,7 @@ def listCompare(listA, listB):
     '''
     return listA == listB
 
-def satisfiesConstraint(candidate, refPattern, refColorTerm, colorTagger):
+def satisfiesConstraint(candidate, refPattern, refColorList, colorTagger):
     '''
     Test a given color name candidate against the pattern and desired basic color term,
     returning True if it satisfies
@@ -36,14 +37,14 @@ def satisfiesConstraint(candidate, refPattern, refColorTerm, colorTagger):
 
     candidatePattern = [item[1] for item in tagged_tokens]
 
-    #If COLOR not in pattern then just test whether two lists are the same
+    #If COLOR not in pattern then just test whether two lists of POS tags are the same.
     result = listCompare(candidatePattern, refPattern)
 
     #Else test that plus color term match
     if 'COLOR' in refPattern and result == True:
         colorTermPosition = [i for i,pos in enumerate(refPattern) if pos == 'COLOR'][0]
 
-        if tokens[colorTermPosition] != refColorTerm:
+        if tokens[colorTermPosition] not in refColorList:
             result = False
     return result
 
@@ -80,10 +81,10 @@ if __name__ == '__main__':
         style = ttk.Style(root)
         style.theme_use('clam')
 
-        rgb = askcolor((255, 255, 0), root)
+        rgb = askcolor((300, 100, 100), root)
         testColor = Color(rgb[1], rgb[0][0], rgb[0][1], rgb[0][2])
 
-        basic_color_family = closestColor(testColor, basicColorTerms).name
+        basic_color_family = [color[1].name for color in closestThreeColors(testColor, basicColorTerms)]
 
         #Generate some names
         sys.stderr.write("Generating candidate names using pattern {} for color ({}, {}, {})...\n".format(pattern, testColor.r, testColor.g, testColor.b))
