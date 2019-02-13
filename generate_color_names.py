@@ -10,6 +10,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkcolorpicker import askcolor
 
+
 tok = TreebankWordTokenizer()
 MAX_ITERATIONS = 500
 

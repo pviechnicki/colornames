@@ -13,7 +13,6 @@ from nltk import FreqDist
 from nltk import TaggerI
 from nltk import pos_tag
 
-
 #Globals
 VERBOSE_FLAG = True
 tok = TreebankWordTokenizer()
