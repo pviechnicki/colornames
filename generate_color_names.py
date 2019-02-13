@@ -30,11 +30,8 @@ def satisfiesConstraint(candidate, refPattern, refColorList, colorTagger):
     returning True if it satisfies
     '''
     result = False
-
     tokens = tok.tokenize(candidate)
-
     tagged_tokens = colorTagger.tag(tokens)
-
     candidatePattern = [item[1] for item in tagged_tokens]
 
     #If COLOR not in pattern then just test whether two lists of POS tags are the same.
@@ -55,7 +52,6 @@ if __name__ == '__main__':
     with open(patternCountsFilename, 'rb') as f:
         allPatternCounts = pickle.load(f)
         patternCounts = {pattern: count for (pattern, count) in allPatternCounts.items() if 'COLOR' in pattern.split(",")}
-
 
     #Read basic color terms dictionary
     sys.stderr.write("Reading basic color terms...\n")

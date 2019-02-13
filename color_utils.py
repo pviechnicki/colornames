@@ -53,7 +53,6 @@ def closestColor(newColor, referenceColors):
         if distance < minDistance:
             minDistance = distance
             result = referenceColor
-
     return result
 
 def closestThreeColors(newColor, referenceColors):
