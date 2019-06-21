@@ -12,6 +12,7 @@ from nltk.tokenize import TreebankWordTokenizer
 from nltk import FreqDist
 from nltk import TaggerI
 from nltk import pos_tag
+from nltk.corpus import wordnet as wn
 
 
 #Globals
@@ -21,13 +22,28 @@ tok = TreebankWordTokenizer()
 
 class Color():
     '''
-    Holds color name and rgb values
+    Holds color name and rgb values, and related words
     '''
     def __init__(self, name, r, g, b):
         self.name = name
         self.r = r
         self.g = g
         self.b = b
+        self.related_words = [] #List of related words with similar meanings
+
+    def setRelatedWords(self, newRelatedWords):
+        '''
+        Set the related words for the color object
+        '''
+        assert isinstance(newRelatedWords, list)
+
+        self.related_words = newRelatedWords
+
+    def getRelatedWords(self):
+        '''
+        Return the related_words list
+        '''
+        return (self.related_words)
 
 def rgbDistance(color1, color2):
     '''
@@ -54,6 +70,15 @@ def closestColor(newColor, referenceColors):
             minDistance = distance
             result = referenceColor
     return result
+
+def closestNColors(newColor, referenceColors, n):
+    '''
+    Pick the top n closest colors to the new color from the reference color list
+    '''
+    distances = [rgbDistance(newColor, referenceColor) for referenceColor in referenceColors]
+    colorsWithDistances = zip(distances, referenceColors)
+    result = sorted(colorsWithDistances, key=lambda tup: tup[0])[:n]
+    return ([c[1] for c in result])
 
 def learnColors(colorNamesDf, n=43):
     '''
@@ -93,11 +118,17 @@ def learnColors(colorNamesDf, n=43):
     'golden', 'dark', 'pale', 'soft', 'the', 'fresh', 'mountain', 'sage', 'desert']
     basic_color_terms = [color for color in basic_color_terms if color not in drop]
 
+    #Take the average R, G, B values for each of the basic color terms
     for basic_color_term in basic_color_terms:
         r = red_sum[basic_color_term]/red_n[basic_color_term]
         g = green_sum[basic_color_term]/green_n[basic_color_term]
         b = blue_sum[basic_color_term]/blue_n[basic_color_term]
         newColor = Color(basic_color_term, r, g, b)
+
+        #Add related words to the basic color object
+        relatedWords = findRelatedWords(basic_color_term)
+
+        newColor.setRelatedWords(relatedWords)
 
         results.append(newColor)
 
@@ -156,3 +187,55 @@ class ColorTagger(TaggerI):
                 new_tag = tag
             color_tagged_tokens.append((token, new_tag))
         return color_tagged_tokens
+
+def get_synset_tokens(wnSynset):
+    '''
+    Pass in a wordnet synset object
+    and it gives you back a set of all the unique tokens in the words of the synset
+    '''
+    #Split off the first field, using period as delimiter
+    name = wnSynset.name().split(".")[0]
+
+    tokens = set(name.split("_"))
+
+    return tokens
+
+
+def get_hyponyms(wnSynset):
+    '''
+    Pass in a wordnet synset, and it finds all the hyponyms. Recursive function.
+    Uses set union (|=)
+    source: https://stackoverflow.com/questions/15330725/how-to-get-all-the-hyponyms-of-a-word-synset-in-python-nltk-and-wordnet?rq=1
+    '''
+
+    hyponyms = set()
+
+    for hyponym in wnSynset.hyponyms():
+
+        hyponyms |= set(get_hyponyms(hyponym))
+
+    return hyponyms | set(wnSynset.hyponyms())
+
+def findRelatedWords(word):
+    '''
+    Use nltk.wordnet.synsets to expand a word to find related terms
+    Pass in a string, get back a list of related terms
+    '''
+
+    assert(isinstance(word, str))
+
+    words = set()
+    hyponyms = []
+
+    temp = [get_hyponyms(s) for s in wn.synsets(word)]
+    #Filter out empty sets from synsets with no hyponyms
+    temp2 = [i for i in temp if len(i) > 0]
+    #Collapse/flatten into a single set
+    hyponyms = set()
+    for i in temp2:
+        hyponyms |= i
+
+    for h in hyponyms:
+        words |= get_synset_tokens(h)
+
+    return(list(words))

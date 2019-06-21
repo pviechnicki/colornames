@@ -17,6 +17,7 @@ from color_utils import Color, rgbDistance, three_dEuclideanDistance, closestCol
 from color_utils import learnColors
 from color_utils import readPaintColors
 from color_utils import ColorTagger
+import logging
 
 #Globals
 VERBOSE_FLAG = True
@@ -48,12 +49,15 @@ def tag_colors(df, basic_colors):
 
 if __name__ == '__main__':
 
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger()
+
     #Read in raw data
-    sys.stderr.write("Reading in raw color names data...\n")
+    logger.info("Reading in raw color names data...\n")
     color_names = readPaintColors(myDataDir)
 
     #Learn the 43 basic color terms and their RGB values from the data
-    sys.stderr.write("Learning basic color names and RGB values...\n")
+    logger.info("Learning basic color names and RGB values...\n")
     basicColorTerms = learnColors(color_names)
     #pickle basicColorTerms
     with open('.\\data\\basicColorTerms.pyc', 'wb') as f:
@@ -62,14 +66,12 @@ if __name__ == '__main__':
     #Add part of speech tags, including color name
     color_names_tagged = tag_colors(color_names, [color.name for color in  basicColorTerms])
 
-    if VERBOSE_FLAG:
-        sys.stderr.write("Training data matrix: {} columns, {} rows.\n".format(color_names_tagged.shape[1],
-            color_names_tagged.shape[0]))
+    logger.debug("Training data matrix: {} columns, {} rows.\n".format(color_names_tagged.shape[1],
+        color_names_tagged.shape[0]))
 
 
     #Convert to string buffer separated by newlines
-    if VERBOSE_FLAG:
-        sys.stderr.write("Learning markov model of color names...\n")
+    logger.info("Learning markov model of color names...\n")
 
     namesBuf = "\n".join(color_names_tagged['color_name_raw'].tolist())
 
@@ -82,8 +84,7 @@ if __name__ == '__main__':
 
 
     #Tally distribution of patterns
-    if VERBOSE_FLAG:
-        sys.stderr.write("Learning counts of tag patterns of color names...\n")
+    logger.info("Learning counts of tag patterns of color names...\n")
     patternCounts = defaultdict(int)
     for pattern in color_names_tagged['tag_pattern']:
         patternCounts[pattern] += 1
