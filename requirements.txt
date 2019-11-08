@@ -100,7 +100,7 @@ nlgen==0.1.2
 nlglib==0.1.0
 nltk==3.2.3
 nose==1.3.7
-notebook==5.0.0
+notebook==5.7.8
 numba==0.34.0+5.g1762237
 numexpr==2.6.2
 numpy==1.14.5
