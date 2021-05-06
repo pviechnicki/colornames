@@ -42,7 +42,7 @@ et-xmlfile==1.0.1
 fastcache==1.0.2
 fastcluster==1.1.23
 Flask==0.12.2
-Flask-Cors==3.0.2
+Flask-Cors==3.0.9
 ftfy==4.4.3
 future==0.16.0
 fuzzywuzzy==0.15.1
